@@ -1,0 +1,7 @@
+*.o
+*.d
+*.swp
+*.nds
+*.elf
+*.bin
+*.bmp
