@@ -3,6 +3,10 @@
 #include "dsregs.h"
 #include "ds3.h"
 
+#define MAX_TEXTURES	128
+static uint32_t texpar[MAX_TEXTURES];
+static int curtex = -1;
+
 void ds3_enable(unsigned int x)
 {
 	REG_DISP3DCNT |= x;
@@ -287,6 +291,70 @@ void ds3_perspectivef(float vfov_deg, float aspect, float znear, float zfar)
 
 	ds3_mult_matrix(m);
 }
+
+int ds3_gen_texture(void)
+{
+	int i;
+	static uint32_t def_texpar = TEXPAR_REPEAT_S | TEXPAR_REPEAT_T | TEXPAR_FMT_RGB;
+
+	for(i=0; i<MAX_TEXTURES; i++) {
+		if(texpar[i] == 0) {
+			texpar[i] = def_texpar;
+			return i;
+		}
+	}
+	return -1;
+}
+
+void ds3_del_texture(int tex)
+{
+	texpar[tex] = 0;
+	if(curtex == tex) curtex = -1;
+}
+
+void ds3_bind_texture(int tex)
+{
+	REG_TEXIMAGE_PARAM = texpar[tex];
+	curtex = tex;
+}
+
+void ds3_tex_parameter(int tex, int par, int val)
+{
+	uint32_t tmp, shift;
+
+	switch(par) {
+	case DS3_TEX_WRAP_S:
+	case DS3_TEX_WRAP_T:
+		shift = par - DS3_TEX_WRAP_S;
+		switch(val) {
+		case DS3_REPEAT:
+			tmp = TEXPAR_REPEAT_S << shift;
+			break;
+		case DS3_CLAMP:
+			tmp = 0;
+			break;
+		case DS3_MIRRORED_REPEAT:
+			tmp = (TEXPAR_REPEAT_S | TEXPAR_FLIP_S) << shift;
+			break;
+		default:
+			return;
+		}
+		texpar[tex] = (texpar[tex] & ~TEXPAR_WRAP_BITS) | tmp;
+		break;
+
+	case DS3_TEX_COLORKEY:
+		if(val) {
+			texpar[tex] |= TEXPAR_KEY0;
+		} else {
+			texpar[tex] &= ~TEXPAR_KEY0;
+		}
+		break;
+
+	default:
+		break;
+	}
+}
+
 
 int32_t x16div(int32_t a, int32_t b)
 {

@@ -24,6 +24,14 @@
 #define DS3_MODELVIEW		1
 #define DS3_TEXTURE			2
 
+#define DS3_TEX_WRAP_S		0
+#define DS3_TEX_WRAP_T		1
+#define DS3_TEX_COLORKEY	2
+
+#define DS3_REPEAT			0
+#define DS3_CLAMP			1
+#define DS3_MIRRORED_REPEAT	2
+
 void ds3_enable(unsigned int x);
 void ds3_disable(unsigned int x);
 
@@ -67,6 +75,11 @@ void ds3_orthof(float left, float right, float top, float bottom, float znear, f
 void ds3_frustum(int32_t left, int32_t right, int32_t top, int32_t bottom, int32_t znear, int32_t zfar);
 
 void ds3_perspectivef(float vfov_deg, float aspect, float znear, float zfar);
+
+int ds3_gen_texture(void);
+void ds3_del_texture(int tex);
+void ds3_bind_texture(int tex);
+void ds3_tex_parameter(int tex, int par, int val);
 
 int32_t x16div(int32_t a, int32_t b);
 
