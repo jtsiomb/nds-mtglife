@@ -32,6 +32,17 @@
 #define DS3_CLAMP			1
 #define DS3_MIRRORED_REPEAT	2
 
+/* these match the TEXPAR_FMT_* bits */
+#define DS3_INDEXED5_ALPHA3	0x04000000
+#define DS3_INDEXED2		0x08000000
+#define DS3_INDEXED4		0x0c000000
+#define DS3_INDEXED8		0x10000000
+#define DS3_COMPRESSED_RGB	0x14000000
+#define DS3_INDEXED3_ALPHA5	0x18000000
+#define DS3_RGB				0x1c000000
+
+int ds3_add_texmem(int bank);
+
 void ds3_enable(unsigned int x);
 void ds3_disable(unsigned int x);
 
@@ -80,6 +91,7 @@ int ds3_gen_texture(void);
 void ds3_del_texture(int tex);
 void ds3_bind_texture(int tex);
 void ds3_tex_parameter(int tex, int par, int val);
+int ds3_tex_image(int tex, int fmt, int xsz, int ysz, void *pixels);
 
 int32_t x16div(int32_t a, int32_t b);
 

@@ -2,8 +2,8 @@ MTG life counter for the Nintendo DS
 ====================================
 
 Not done yet. For now use my MTG life counter for the Gameboy Advance instead:
-https://github.com/jtsiomb/gba-mtglife which works fine in the NDS with a GBA
-cartridge.
+https://github.com/jtsiomb/gba-mtglife
+It works fine in the NDS with a GBA cartridge.
 
 License
 -------

@@ -374,13 +374,21 @@
 #define OAM_PTR				((void*)0x7000000)
 
 /* teximage param flags */
+#define TEXPAR_ADDR_MASK	0x0000ffff
+#define TEXPAR_ADDR(x)		(((x) >> 3) & TEXPAR_ADDR_MASK)
 #define TEXPAR_REPEAT_S		0x00010000
 #define TEXPAR_REPEAT_T		0x00020000
 #define TEXPAR_FLIP_S		0x00040000
 #define TEXPAR_FLIP_T		0x00080000
 #define TEXPAR_WRAP_BITS	0x000f0000
-#define TEXPAR_SIZE_S(x)	(((x) & 7) << 20)
-#define TEXPAR_SIZE_T(x)	(((x) & 7) << 23)
+#define TEXPAR_SIZE_S_MASK	0x00700000
+#define TEXPAR_SIZE_T_MASK	0x03800000
+#define TEXPAR_SIZE_S_SHIFT	20
+#define TEXPAR_SIZE_T_SHIFT	23
+#define TEXPAR_SIZE_S(x)	(((x) & 7) << TEXPAR_SIZE_S_SHIFT)
+#define TEXPAR_SIZE_T(x)	(((x) & 7) << TEXPAR_SIZE_T_SHIFT)
+#define TEXPAR_FMT_SHIFT	26
+#define TEXPAR_FMT_MASK		0x1c000000
 #define TEXPAR_FMT_A315		0x04000000
 #define TEXPAR_FMT_I2		0x08000000
 #define TEXPAR_FMT_I4		0x0c000000

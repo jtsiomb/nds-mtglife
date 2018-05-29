@@ -7,6 +7,7 @@ static void xorpat(void *addr, int xsz, int ysz);
 
 int main(void)
 {
+	int tex;
 	uint16_t *bgmem;
 
 	ds_init(DS_INIT_2D | DS_INIT_3D);
@@ -29,8 +30,13 @@ int main(void)
 
 	ds_vram_map(DS_VRAM_A_128, DS_VRAM_USE_LCDC, 0);
 	bgmem = ds_vram_map(DS_VRAM_C_128, DS_VRAM_USE_B_BG, 0);
+	ds3_add_texmem(DS_VRAM_B_128);
+	ds3_add_texmem(DS_VRAM_D_128);
 
 	xorpat(bgmem, 256, 256);
+
+	tex = ds3_gen_texture();
+	ds3_tex_image(tex, DS3_RGB, 256, 256, bgmem);
 
 	ds3_clear_color(RGB15(0, 0, 0), 31);
 	ds3_clear_depth(0x7fff);
@@ -49,19 +55,29 @@ int main(void)
 		ds3_load_identity();
 		ds3_translate(0, 0, -0x30000);
 
+		ds3_enable(DS3_TEXTURE_2D);
+		ds3_bind_texture(tex);
+
 		ds3_begin(DS3_QUADS);
-		ds3_color3b(255, 0, 0);
+		ds3_color3b(255, 255, 255);
+		ds3_texcoord2(0, 0);
+		/*ds3_color3b(255, 0, 0);*/
 		ds3_vertex2(-0x8000, -0x8000);
-		ds3_color3b(0, 255, 0);
+		ds3_texcoord2(0x8000, 0);
+		/*ds3_color3b(0, 255, 0);*/
 		ds3_vertex2(0x8000, -0x8000);
-		ds3_color3b(0, 0, 255);
+		ds3_texcoord2(0x8000, 0x8000);
+		/*ds3_color3b(0, 0, 255);*/
 		ds3_vertex2(0x8000, 0x8000);
-		ds3_color3b(255, 255, 0);
+		ds3_texcoord2(0, 0x8000);
+		/*ds3_color3b(255, 255, 0);*/
 		ds3_vertex2(-0x8000, 0x8000);
 		ds3_end();
 
+		ds3_disable(DS3_TEXTURE_2D);
+
 		ds3_swap_buffers();
-		while(REG_VCOUNT < 192);
+		ds_wait_vsync();
 	}
 	return 0;
 }
