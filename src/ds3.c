@@ -115,9 +115,13 @@ void ds3_scale(int32_t x, int32_t y, int32_t z)
 	REG_MTX_SCALE = (int16_t)(z >> 4);
 }
 
+/* TODO:
+ * 0     Translucent polygon Y-sorting (0=Auto-sort, 1=Manual-sort)
+ * 1     Depth Buffering  (0=With Z-value, 1=With W-value)
+ */
 void ds3_swap_buffers(void)
 {
-	REG_SWAP_BUFFERS = 0;
+	REG_SWAP_BUFFERS = 1;
 }
 
 void ds3_begin(int prim)
