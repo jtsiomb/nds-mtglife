@@ -3,22 +3,12 @@
 #include "dsregs.h"
 #include "ds.h"
 #include "ds3.h"
+#include "ds3impl.h"
 
 struct mem_range {
 	unsigned int start, size;
 	struct mem_range *prev, *next;
 };
-
-struct texture {
-	int used;
-	struct mem_range *mem;
-	uint32_t param;
-};
-
-static int tex_width(struct texture *tex);
-static int tex_height(struct texture *tex);
-static int tex_fmt(struct texture *tex);
-static int tex_size(struct texture *tex);
 
 static int calc_texture_size(int width, int height, int fmt);
 
@@ -69,6 +59,7 @@ int ds3_gen_texture(void)
 
 	for(i=0; i<MAX_TEXTURES; i++) {
 		if(!textures[i].used) {
+			textures[i].used = 1;
 			textures[i].mem = 0;
 			textures[i].param = DEF_TEXPAR;
 			return i;
@@ -95,6 +86,14 @@ void ds3_bind_texture(int id)
 {
 	REG_TEXIMAGE_PARAM = textures[id].param;
 	curtex = id;
+}
+
+struct texture *ds3_priv_current_texture(void)
+{
+	if(curtex >= 0) {
+		return textures + curtex;
+	}
+	return 0;
 }
 
 void ds3_tex_parameter(int id, int par, int val)
@@ -143,10 +142,10 @@ int ds3_tex_image(int id, int fmt, int xsz, int ysz, void *pixels)
 	int texsize, prev_texsize;
 	struct texture *tex = textures + id;
 	unsigned int offs;
-	unsigned char *dest, *src = pixels;
+	uint16_t *dest, *src = pixels;
 
 	texsize = calc_texture_size(xsz, ysz, fmt);
-	prev_texsize = tex_size(tex + id);
+	prev_texsize = ds3_priv_tex_size(tex + id);
 
 	/* if the previous size wasn't identical to the new requirements, realloc it */
 	if(tex->mem) {
@@ -175,17 +174,19 @@ int ds3_tex_image(int id, int fmt, int xsz, int ysz, void *pixels)
 	while(texsize > 0) {
 		unsigned int next_bank_offs = (bankidx + 1) * TEX_BANK_SIZE;
 		unsigned int nbytes = next_bank_offs - offs;
+		unsigned int hwords = nbytes / 2;
 
 		if(texsize < nbytes) {
 			nbytes = texsize;
 		}
 
 		ds_vram_map(texbank[bankidx], DS_VRAM_USE_LCDC, 0);
-		memcpy(dest, src, nbytes);
+		for(i=0; i<hwords; i++) {
+			*dest++ = *src++;
+		}
+		/*memcpy(dest, src, nbytes);*/
 		ds_vram_map(texbank[bankidx], DS_VRAM_USE_TEXIMG, 0);
 
-		dest += nbytes;
-		src += nbytes;
 		texsize -= nbytes;
 		offs = next_bank_offs;
 		bankidx++;
@@ -194,24 +195,37 @@ int ds3_tex_image(int id, int fmt, int xsz, int ysz, void *pixels)
 	return 0;
 }
 
-static int tex_width(struct texture *tex)
+int ds3_priv_tex_width(struct texture *tex)
 {
-	return (tex->param >> TEXPAR_SIZE_S_SHIFT) & 7;
+	return 1 << ds3_priv_tex_width_shift(tex);
 }
 
-static int tex_height(struct texture *tex)
+int ds3_priv_tex_height(struct texture *tex)
 {
-	return (tex->param >> TEXPAR_SIZE_T_SHIFT) & 7;
+	return 1 << ds3_priv_tex_height_shift(tex);
 }
 
-static int tex_fmt(struct texture *tex)
+int ds3_priv_tex_width_shift(struct texture *tex)
+{
+	return ((tex->param >> TEXPAR_SIZE_S_SHIFT) & 7) + 3;
+}
+
+int ds3_priv_tex_height_shift(struct texture *tex)
+{
+	return ((tex->param >> TEXPAR_SIZE_T_SHIFT) & 7) + 3;
+}
+
+int ds3_priv_tex_fmt(struct texture *tex)
 {
 	return (tex->param >> TEXPAR_FMT_SHIFT) & 7;
 }
 
-static int tex_size(struct texture *tex)
+int ds3_priv_tex_size(struct texture *tex)
 {
-	return calc_texture_size(tex_width(tex), tex_height(tex), tex_fmt(tex));
+	int w = ds3_priv_tex_width(tex);
+	int h = ds3_priv_tex_height(tex);
+	int fmt = ds3_priv_tex_fmt(tex);
+	return calc_texture_size(w, h, fmt);
 }
 
 static int calc_texture_size(int width, int height, int fmt)
@@ -231,7 +245,7 @@ static int calc_texture_size(int width, int height, int fmt)
 	case DS3_INDEXED4:
 		return npix / 2;
 
-	case DS3_RGB:
+	case DS3_RGB5_A1:
 		return npix * 2;
 
 	default:

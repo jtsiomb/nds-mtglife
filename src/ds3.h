@@ -39,7 +39,7 @@
 #define DS3_INDEXED8		0x10000000
 #define DS3_COMPRESSED_RGB	0x14000000
 #define DS3_INDEXED3_ALPHA5	0x18000000
-#define DS3_RGB				0x1c000000
+#define DS3_RGB5_A1			0x1c000000
 
 int ds3_add_texmem(int bank);
 

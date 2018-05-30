@@ -18,7 +18,8 @@ OBJCOPY = $(ARCH)objcopy
 
 EMU = desmume-cli
 
-opt = -O3 -fomit-frame-pointer -mcpu=arm946e-s -mtune=arm946e-s
+#opt = -O3 -fomit-frame-pointer -mcpu=arm946e-s -mtune=arm946e-s
+opt = -O0 -fomit-frame-pointer -mcpu=arm946e-s -mtune=arm946e-s
 dbg = -g
 
 CFLAGS = -mthumb $(opt) $(dbg)
@@ -40,6 +41,11 @@ clean:
 .PHONY: simrun
 simrun: $(bin)
 	$(EMU) $(EMUFLAGS) $(bin)
+
+.PHONY: debug
+debug: $(bin)
+	$(EMU) --arm9gdb=1234 $(bin) >/dev/null 2>/dev/null &
+	$(ARCH)gdb ./arm9.elf
 
 data/icon.bmp: data/icon.bmp.base64
 	base64 -d $< >$@

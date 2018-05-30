@@ -3,6 +3,7 @@
 #include "dsregs.h"
 #include "ds.h"
 #include "ds3.h"
+#include "ds3impl.h"
 
 void ds3_enable(unsigned int x)
 {
@@ -178,9 +179,23 @@ void ds3_normal3f(float x, float y, float z)
 	ds3_normal((int32_t)(x * 65536.0f), (int32_t)(y * 65536.0f), (int32_t)(z * 65536.0f));
 }
 
+/* DS texcoords are in texel space 12.4 fixed point
+ * convert 16.16 [0, 1] to 12.4 [0, texsize]
+ */
+
 void ds3_texcoord2(int32_t s, int32_t t)
 {
-	REG_TEXCOORD = (((s) >> 12) & 0xffff) | (((t) << 4) & 0xffff0000);
+	int sx = 0, sy = 0;
+	struct texture *tex = ds3_priv_current_texture();
+	if(!tex) return;
+
+	sx = ds3_priv_tex_width_shift(tex);
+	sy = ds3_priv_tex_height_shift(tex);
+
+	s >>= 12 - sx;
+	t >>= 12 - sy;
+
+	REG_TEXCOORD = (s & 0xffff) | ((t << 16) & 0xffff0000);
 }
 
 void ds3_texcoord2f(float s, float t)

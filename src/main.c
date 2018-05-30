@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdint.h>
 #include "dsregs.h"
 #include "ds.h"
@@ -5,10 +6,22 @@
 
 static void xorpat(void *addr, int xsz, int ysz);
 
+#define SIN_TAB_SZ	256
+static int32_t sintab[SIN_TAB_SZ];
+static int32_t costab[SIN_TAB_SZ];
+
+
 int main(void)
 {
-	int tex;
+	int i, tex;
 	uint16_t *bgmem;
+	uint32_t frame = 0;
+	int32_t m[16] = {
+		0x10000, 0, 0, 0,
+		0, 0x10000, 0, 0,
+		0, 0, 0x10000, 0,
+		0, 0, 0, 0x10000
+	};
 
 	ds_init(DS_INIT_2D | DS_INIT_3D);
 
@@ -35,10 +48,18 @@ int main(void)
 
 	xorpat(bgmem, 256, 256);
 
-	tex = ds3_gen_texture();
-	ds3_tex_image(tex, DS3_RGB, 256, 256, bgmem);
+	for(i=0; i<SIN_TAB_SZ; i++) {
+		float theta = (float)i * M_PI * 2.0 / (float)SIN_TAB_SZ;
+		float s = sin(theta);
+		float c = cos(theta);
+		sintab[i] = (int32_t)(s * 65536.0);
+		costab[i] = (int32_t)(c * 65536.0);
+	}
 
-	ds3_clear_color(RGB15(0, 0, 0), 31);
+	tex = ds3_gen_texture();
+	ds3_tex_image(tex, DS3_RGB5_A1, 256, 256, bgmem);
+
+	ds3_clear_color(RGB15(8, 8, 8), 31);
 	ds3_clear_depth(0x7fff);
 	ds3_viewport(0, 0, 256, 192);
 
@@ -51,9 +72,15 @@ int main(void)
 	ds3_perspectivef(45, 1.33333, 1.0, 100.0);
 
 	for(;;) {
+		int idx = (frame++ >> 1) & 0xff;
+
+		m[0] = costab[idx]; m[1] = sintab[idx];
+		m[4] = -sintab[idx]; m[5] = costab[idx];
+
 		ds3_matrix_mode(DS3_MODELVIEW);
 		ds3_load_identity();
 		ds3_translate(0, 0, -0x30000);
+		ds3_mult_matrix(m);
 
 		ds3_enable(DS3_TEXTURE_2D);
 		ds3_bind_texture(tex);
@@ -61,16 +88,12 @@ int main(void)
 		ds3_begin(DS3_QUADS);
 		ds3_color3b(255, 255, 255);
 		ds3_texcoord2(0, 0);
-		/*ds3_color3b(255, 0, 0);*/
 		ds3_vertex2(-0x8000, -0x8000);
-		ds3_texcoord2(0x8000, 0);
-		/*ds3_color3b(0, 255, 0);*/
+		ds3_texcoord2(0xffff, 0);
 		ds3_vertex2(0x8000, -0x8000);
-		ds3_texcoord2(0x8000, 0x8000);
-		/*ds3_color3b(0, 0, 255);*/
+		ds3_texcoord2(0xffff, 0xffff);
 		ds3_vertex2(0x8000, 0x8000);
-		ds3_texcoord2(0, 0x8000);
-		/*ds3_color3b(255, 255, 0);*/
+		ds3_texcoord2(0, 0xffff);
 		ds3_vertex2(-0x8000, 0x8000);
 		ds3_end();
 
