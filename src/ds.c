@@ -1,6 +1,8 @@
 #include "ds.h"
 #include "dsregs.h"
 
+void ds3_init(void);	/* ds3.c */
+
 void ds_init(unsigned int flags)
 {
 	uint32_t pwr = POWCNT1_LCD | POWCNT1_DSWAP;	/* by default make top be disp A */
@@ -10,6 +12,8 @@ void ds_init(unsigned int flags)
 	}
 	if(flags & DS_INIT_3D) {
 		pwr |= POWCNT1_3DREND | POWCNT1_3DGEOM;
+
+		ds3_init();
 	}
 	REG_POWCNT1 = pwr;
 

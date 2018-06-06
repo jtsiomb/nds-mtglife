@@ -5,6 +5,16 @@
 #include "ds3.h"
 #include "ds3impl.h"
 
+void ds3_init(void)
+{
+	while(REG_GXSTAT & GXSTAT_BUSY);
+	REG_GXSTAT |= GXSTAT_CLEAR_FIFO;
+	/* initialize zbuffer mode */
+	REG_SWAP_BUFFERS = 0;
+	/* clear display 3D control register */
+	REG_DISP3DCNT = 0;
+}
+
 void ds3_enable(unsigned int x)
 {
 	REG_DISP3DCNT |= x;

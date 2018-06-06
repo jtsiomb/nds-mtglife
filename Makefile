@@ -47,5 +47,9 @@ debug: $(bin)
 	$(EMU) --arm9gdb=1234 $(bin) >/dev/null 2>/dev/null &
 	$(ARCH)gdb ./arm9.elf
 
+.PHONY: install
+install:
+	mount /media/usb0 && cp $(bin) /media/usb0/nds/$(bin); umount /media/usb0
+
 data/icon.bmp: data/icon.bmp.base64
 	base64 -d $< >$@

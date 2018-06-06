@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
 #include "dsregs.h"
@@ -41,10 +43,10 @@ int main(void)
 	REG_B_BG2PC = 0;
 	REG_B_BG2PD = 0x100;
 
-	ds_vram_map(DS_VRAM_A_128, DS_VRAM_USE_LCDC, 0);
 	bgmem = ds_vram_map(DS_VRAM_C_128, DS_VRAM_USE_B_BG, 0);
-	ds3_add_texmem(DS_VRAM_B_128);
-	ds3_add_texmem(DS_VRAM_D_128);
+	ds3_add_texmem(DS_VRAM_A_128);
+	//ds3_add_texmem(DS_VRAM_B_128);
+	//ds3_add_texmem(DS_VRAM_D_128);
 
 	xorpat(bgmem, 256, 256);
 
@@ -59,7 +61,7 @@ int main(void)
 	tex = ds3_gen_texture();
 	ds3_tex_image(tex, DS3_RGB5_A1, 256, 256, bgmem);
 
-	ds3_clear_color(RGB15(8, 8, 8), 31);
+	ds3_clear_color(RGB15(6, 6, 6), 31);
 	ds3_clear_depth(0x7fff);
 	ds3_viewport(0, 0, 256, 192);
 
@@ -70,6 +72,9 @@ int main(void)
 	ds3_matrix_mode(DS3_PROJECTION);
 	ds3_load_identity();
 	ds3_perspectivef(45, 1.33333, 1.0, 100.0);
+
+	ds3_enable(DS3_TEXTURE_2D);
+	ds3_bind_texture(tex);
 
 	for(;;) {
 		int idx = (frame++ >> 1) & 0xff;
@@ -82,9 +87,6 @@ int main(void)
 		ds3_translate(0, 0, -0x30000);
 		ds3_mult_matrix(m);
 
-		ds3_enable(DS3_TEXTURE_2D);
-		ds3_bind_texture(tex);
-
 		ds3_begin(DS3_QUADS);
 		ds3_color3b(255, 255, 255);
 		ds3_texcoord2(0, 0);
@@ -96,8 +98,6 @@ int main(void)
 		ds3_texcoord2(0, 0xffff);
 		ds3_vertex2(-0x8000, 0x8000);
 		ds3_end();
-
-		ds3_disable(DS3_TEXTURE_2D);
 
 		ds3_swap_buffers();
 		ds_wait_vsync();
