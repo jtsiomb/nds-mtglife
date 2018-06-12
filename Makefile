@@ -1,4 +1,4 @@
-csrc = $(wildcard src/*.c)
+csrc = $(wildcard src/*.c) $(wildcard src/dtx/*.c)
 ssrc = src/startup/arm9entry.s $(wildcard src/*.s)
 Ssrc = $(wildcard src/startup/*.S) $(wildcard src/*.S)
 obj = $(csrc:.c=.o) $(ssrc:.s=.o) $(Ssrc:.S=.o)
@@ -21,8 +21,9 @@ EMU = desmume-cli
 #opt = -O3 -fomit-frame-pointer -mcpu=arm946e-s -mtune=arm946e-s
 opt = -O0 -fomit-frame-pointer -mcpu=arm946e-s -mtune=arm946e-s
 dbg = -g
+def = -DNO_FREETYPE -DNO_OPENGL
 
-CFLAGS = -mthumb $(opt) $(dbg)
+CFLAGS = -mthumb $(opt) $(dbg) $(def)
 LDFLAGS = -nostartfiles -Wl,--gc-sections -lm
 
 $(bin): arm9.elf arm7.elf data/icon.bmp
