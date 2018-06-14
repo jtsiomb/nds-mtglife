@@ -5,6 +5,7 @@
 #include "dsregs.h"
 #include "ds.h"
 #include "ds3.h"
+#include "ui.h"
 
 static void xorpat(void *addr, int xsz, int ysz);
 
@@ -44,8 +45,8 @@ int main(void)
 	REG_B_BG2PD = 0x100;
 
 	bgmem = ds_vram_map(DS_VRAM_C_128, DS_VRAM_USE_B_BG, 0);
+	ds3_add_texmem(DS_VRAM_B_128);
 	ds3_add_texmem(DS_VRAM_A_128);
-	//ds3_add_texmem(DS_VRAM_B_128);
 	//ds3_add_texmem(DS_VRAM_D_128);
 
 	xorpat(bgmem, 256, 256);
@@ -73,6 +74,8 @@ int main(void)
 	ds3_load_identity();
 	ds3_perspectivef(45, 1.33333, 1.0, 100.0);
 
+	init_ui();
+
 	ds3_enable(DS3_TEXTURE_2D);
 	ds3_bind_texture(tex);
 
@@ -98,6 +101,8 @@ int main(void)
 		ds3_texcoord2(0, 0xffff);
 		ds3_vertex2(-0x8000, 0x8000);
 		ds3_end();
+
+		draw_ui();
 
 		ds3_swap_buffers();
 		ds_wait_vsync();

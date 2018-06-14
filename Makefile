@@ -54,3 +54,6 @@ install:
 
 data/icon.bmp: data/icon.bmp.base64
 	base64 -d $< >$@
+
+data/bignum.glyphmap:
+	font2glyphmap -size 18 -padding 4 -range 48-58 -o $@ /usr/share/fonts/truetype/msttcorefonts/georgia.ttf
