@@ -59,9 +59,6 @@ int main(void)
 		costab[i] = (int32_t)(c * 65536.0);
 	}
 
-	tex = ds3_gen_texture();
-	ds3_tex_image(tex, DS3_RGB5_A1, 256, 256, bgmem);
-
 	ds3_clear_color(RGB15(6, 6, 6), 31);
 	ds3_clear_depth(0x7fff);
 	ds3_viewport(0, 0, 256, 192);
@@ -76,12 +73,10 @@ int main(void)
 
 	init_ui();
 
-	ds3_enable(DS3_TEXTURE_2D);
-	ds3_bind_texture(tex);
-
 	for(;;) {
 		int idx = (frame++ >> 1) & 0xff;
 
+		/*
 		m[0] = costab[idx]; m[1] = sintab[idx];
 		m[4] = -sintab[idx]; m[5] = costab[idx];
 
@@ -101,6 +96,7 @@ int main(void)
 		ds3_texcoord2(0, 0xffff);
 		ds3_vertex2(-0x8000, 0x8000);
 		ds3_end();
+		*/
 
 		draw_ui();
 
