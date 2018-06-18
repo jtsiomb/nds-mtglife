@@ -45,9 +45,10 @@ int main(void)
 	REG_B_BG2PD = 0x100;
 
 	bgmem = ds_vram_map(DS_VRAM_C_128, DS_VRAM_USE_B_BG, 0);
-	ds3_add_texmem(DS_VRAM_B_128);
 	ds3_add_texmem(DS_VRAM_A_128);
-	//ds3_add_texmem(DS_VRAM_D_128);
+	ds3_add_texmem(DS_VRAM_B_128);
+
+	ds3_add_palmem(DS_VRAM_E_64);
 
 	xorpat(bgmem, 256, 256);
 
@@ -65,7 +66,7 @@ int main(void)
 
 	ds3_enable(DS3_POLYGON_SMOOTH);
 
-	REG_POLYGON_ATTR = 0x001f0080;	/* alpha = 31, cull back */
+	REG_POLYGON_ATTR = 0x001f00c0;	/* alpha = 31, no culling */
 
 	ds3_matrix_mode(DS3_PROJECTION);
 	ds3_load_identity();

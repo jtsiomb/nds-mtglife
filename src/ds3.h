@@ -27,6 +27,7 @@
 #define DS3_TEX_WRAP_S		0
 #define DS3_TEX_WRAP_T		1
 #define DS3_TEX_COLORKEY	2
+#define DS3_TEX_PALETTE		3
 
 #define DS3_REPEAT			0
 #define DS3_CLAMP			1
@@ -42,6 +43,7 @@
 #define DS3_RGB5_A1			0x1c000000
 
 int ds3_add_texmem(int bank);
+int ds3_add_palmem(int bank);
 
 void ds3_enable(unsigned int x);
 void ds3_disable(unsigned int x);
@@ -92,6 +94,12 @@ void ds3_del_texture(int tex);
 void ds3_bind_texture(int tex);
 void ds3_tex_parameter(int tex, int par, int val);
 int ds3_tex_image(int tex, int fmt, int xsz, int ysz, void *pixels);
+
+int ds3_gen_palette(void);
+void ds3_del_palette(int pal);
+int ds3_palette_data(int pal, int ncols, uint16_t *cols);
+uint16_t *ds3_map_palette(int pal);
+void ds3_unmap_palette(int pal);
 
 int32_t x16div(int32_t a, int32_t b);
 

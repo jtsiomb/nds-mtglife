@@ -7,6 +7,13 @@ struct texture {
 	int used;
 	struct mem_range *mem;
 	uint32_t param;
+	uint16_t pal_base;
+};
+
+struct tex_palette {
+	int used;
+	int ncols;
+	struct mem_range *mem;
 };
 
 struct texture *ds3_priv_current_texture(void);

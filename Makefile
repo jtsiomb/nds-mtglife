@@ -7,6 +7,8 @@ csrc-arm7 = $(wildcard src/arm7/*.c)
 ssrc-arm7 = src/startup/arm7entry.s $(wildcard src/arm7/*.s)
 obj-arm7 = $(csrc-arm7:.c=.o) $(ssrc-arm7:.s=.o)
 
+datafiles = data/bignum.glyphmap
+
 name = nds-mtglife
 bin = $(name).nds
 
@@ -34,6 +36,8 @@ arm9.elf: $(obj)
 
 arm7.elf: $(obj-arm7)
 	$(CC) -o $@ $(obj-arm7) -Wl,-T,ds_arm7.ld $(LDFLAGS)
+
+src/data.o: src/data.s $(datafiles)
 
 .PHONY: clean
 clean:
