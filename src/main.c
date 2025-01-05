@@ -6,6 +6,8 @@
 #include "ds.h"
 #include "ds3.h"
 
+
+static void draw_cube(void);
 static void xorpat(void *addr, int xsz, int ysz);
 
 #define SIN_TAB_SZ	256
@@ -78,32 +80,81 @@ int main(void)
 
 	for(;;) {
 		int idx = (frame++ >> 1) & 0xff;
-
-		m[0] = costab[idx]; m[1] = sintab[idx];
-		m[4] = -sintab[idx]; m[5] = costab[idx];
+		int32_t scale = (sintab[(frame >> 1) & 0xff] >> 9) + 204;
+		int32_t sa = ((sintab[idx] >> 8) * scale) >> 8;
+		int32_t ca = ((costab[idx] >> 8) * scale) >> 8;
+		int32_t x = ca * -128 + sa * -96 + (128 << 8);
+		int32_t y = -sa * -128 + ca * -96 + (96 << 8);
 
 		ds3_matrix_mode(DS3_MODELVIEW);
 		ds3_load_identity();
 		ds3_translate(0, 0, -0x30000);
+
+		m[0] = 0x10000;
+		m[2] = m[8] = 0;
+		m[5] = costab[idx]; m[6] = sintab[idx];
+		m[9] = -sintab[idx]; m[10] = costab[idx];
 		ds3_mult_matrix(m);
 
-		ds3_begin(DS3_QUADS);
-		ds3_color3b(255, 255, 255);
-		ds3_texcoord2(0, 0);
-		ds3_vertex2(-0x8000, -0x8000);
-		ds3_texcoord2(0xffff, 0);
-		ds3_vertex2(0x8000, -0x8000);
-		ds3_texcoord2(0xffff, 0xffff);
-		ds3_vertex2(0x8000, 0x8000);
-		ds3_texcoord2(0, 0xffff);
-		ds3_vertex2(-0x8000, 0x8000);
-		ds3_end();
+		m[5] = 0x10000;
+		m[6] = m[9] = 0;
+		m[0] = costab[idx]; m[2] = -sintab[idx];
+		m[8] = sintab[idx];
+		ds3_mult_matrix(m);
+
+		draw_cube();
 
 		ds3_swap_buffers();
 		ds_wait_vsync();
+
+		REG_B_BG2PA = ca;
+		REG_B_BG2PB = sa;
+		REG_B_BG2PC = -sa;
+		REG_B_BG2PD = ca;
+		REG_B_BG2X = x;
+		REG_B_BG2Y = y;
 	}
 	return 0;
 }
+
+#define VOFFS	0x8000
+static void draw_cube(void)
+{
+	ds3_begin(DS3_QUADS);
+	ds3_color(0xffff);
+	//ds3_color(RGB15(31, 0, 0));
+	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, VOFFS);
+	//ds3_color(RGB15(0, 31, 0));
+	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, -VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(VOFFS, VOFFS, VOFFS);
+	//ds3_color(RGB15(0, 0, 31));
+	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(-VOFFS, -VOFFS, -VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(VOFFS, VOFFS, -VOFFS);
+	//ds3_color(RGB15(31, 31, 0));
+	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, -VOFFS, -VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(-VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, VOFFS, VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
+	//ds3_color(RGB15(31, 0, 31));
+	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, -VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
+	//ds3_color(RGB15(0, 31, 31));
+	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
+	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, -VOFFS, VOFFS);
+	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, -VOFFS, -VOFFS);
+	ds3_end();
+}
+
 
 static void xorpat(void *addr, int xsz, int ysz)
 {

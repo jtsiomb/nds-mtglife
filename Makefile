@@ -7,7 +7,7 @@ csrc-arm7 = $(wildcard src/arm7/*.c)
 ssrc-arm7 = src/startup/arm7entry.s $(wildcard src/arm7/*.s)
 obj-arm7 = $(csrc-arm7:.c=.o) $(ssrc-arm7:.s=.o)
 
-name = nds-mtglife
+name = texcube
 bin = $(name).nds
 
 ARCH = arm-none-eabi-
