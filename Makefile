@@ -49,7 +49,7 @@ debug: $(bin)
 
 .PHONY: install
 install:
-	mount /media/usb0 && cp $(bin) /media/usb0/nds/$(bin); umount /media/usb0
+	mount /media/usb0 && cp $(bin) /media/usb0/$(bin); umount /media/usb0
 
 data/icon.bmp: data/icon.bmp.base64
 	base64 -d $< >$@

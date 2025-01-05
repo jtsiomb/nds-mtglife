@@ -69,11 +69,18 @@ int main(void)
 
 	ds3_enable(DS3_POLYGON_SMOOTH);
 
-	REG_POLYGON_ATTR = 0x001f0080;	/* alpha = 31, cull back */
+	REG_POLYGON_ATTR = 0x001f0081;	/* alpha = 31, cull back, light0 */
 
 	ds3_matrix_mode(DS3_PROJECTION);
 	ds3_load_identity();
 	ds3_perspectivef(45, 1.33333, 1.0, 100.0);
+
+	ds3_matrix_mode(DS3_MODELVIEW);
+	ds3_load_identity();
+
+	ds3_ambient3b(8, 8, 8);
+	ds3_light_color(0, 0x7fff);
+	ds3_mtl_diffuse(RGB15(31, 31, 31));
 
 	ds3_enable(DS3_TEXTURE_2D);
 	ds3_bind_texture(tex);
@@ -86,9 +93,10 @@ int main(void)
 		int32_t x = ca * -128 + sa * -96 + (128 << 8);
 		int32_t y = -sa * -128 + ca * -96 + (96 << 8);
 
-		ds3_matrix_mode(DS3_MODELVIEW);
 		ds3_load_identity();
 		ds3_translate(0, 0, -0x30000);
+
+		ds3_light_dir(0, 0, 0, 0xffff);
 
 		m[0] = 0x10000;
 		m[2] = m[8] = 0;
@@ -99,7 +107,7 @@ int main(void)
 		m[5] = 0x10000;
 		m[6] = m[9] = 0;
 		m[0] = costab[idx]; m[2] = -sintab[idx];
-		m[8] = sintab[idx];
+		m[8] = sintab[idx]; m[10] = costab[idx];
 		ds3_mult_matrix(m);
 
 		draw_cube();
@@ -121,33 +129,39 @@ int main(void)
 static void draw_cube(void)
 {
 	ds3_begin(DS3_QUADS);
-	ds3_color(0xffff);
+	//ds3_color(0xffff);
 	//ds3_color(RGB15(31, 0, 0));
+	ds3_normal(0, 0, 0x10000);
 	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, -VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, VOFFS);
 	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, VOFFS);
 	//ds3_color(RGB15(0, 31, 0));
+	ds3_normal(0x10000, 0, 0);
 	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, -VOFFS);
 	ds3_texcoord2(0, 0xffff);		ds3_vertex3(VOFFS, VOFFS, VOFFS);
 	//ds3_color(RGB15(0, 0, 31));
+	ds3_normal(0, 0, -0x10000);
 	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(-VOFFS, -VOFFS, -VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
 	ds3_texcoord2(0, 0xffff);		ds3_vertex3(VOFFS, VOFFS, -VOFFS);
 	//ds3_color(RGB15(31, 31, 0));
+	ds3_normal(-0x10000, 0, 0);
 	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, -VOFFS, -VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(-VOFFS, -VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, VOFFS, VOFFS);
 	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
 	//ds3_color(RGB15(31, 0, 31));
+	ds3_normal(0, 0x10000, 0);
 	ds3_texcoord2(0, 0);			ds3_vertex3(-VOFFS, VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(VOFFS, VOFFS, -VOFFS);
 	ds3_texcoord2(0, 0xffff);		ds3_vertex3(-VOFFS, VOFFS, -VOFFS);
 	//ds3_color(RGB15(0, 31, 31));
+	ds3_normal(0, -0x10000, 0);
 	ds3_texcoord2(0, 0);			ds3_vertex3(VOFFS, -VOFFS, -VOFFS);
 	ds3_texcoord2(0xffff, 0);		ds3_vertex3(VOFFS, -VOFFS, VOFFS);
 	ds3_texcoord2(0xffff, 0xffff);	ds3_vertex3(-VOFFS, -VOFFS, VOFFS);

@@ -21,8 +21,9 @@
 #define DS3_QUAD_STRIP		3
 
 #define DS3_PROJECTION		0
-#define DS3_MODELVIEW		1
-#define DS3_TEXTURE			2
+#define DS3_MODELVIEW_NOLT	1
+#define DS3_MODELVIEW		2
+#define DS3_TEXTURE			3
 
 #define DS3_TEX_WRAP_S		0
 #define DS3_TEX_WRAP_T		1
@@ -49,6 +50,27 @@ void ds3_disable(unsigned int x);
 void ds3_clear_color(uint16_t color, int a);
 void ds3_clear_depth(int z);
 
+void ds3_light_dir(int lidx, int32_t x, int32_t y, int32_t z);
+void ds3_light_dirf(int lidx, float x, float y, float z);
+void ds3_light_color(int lidx, uint16_t color);
+void ds3_light_color3b(int lidx, unsigned int r, unsigned int g, unsigned int b);
+void ds3_light_color3f(int lidx, float r, float g, float b);
+
+void ds3_ambient(uint16_t color);
+void ds3_ambient3b(unsigned int r, unsigned int g, unsigned int b);
+void ds3_ambient3f(float r, float g, float b);
+
+void ds3_mtl_diffuse(uint16_t color);
+void ds3_mtl_diffuse3b(unsigned int r, unsigned int g, unsigned int b);
+void ds3_mtl_diffuse3f(float r, float g, float b);
+void ds3_mtl_specular(uint16_t color);
+void ds3_mtl_specular3b(unsigned int r, unsigned int g, unsigned int b);
+void ds3_mtl_specular3f(float r, float g, float b);
+void ds3_mtl_emissive(uint16_t color);
+void ds3_mtl_emissive3b(unsigned int r, unsigned int g, unsigned int b);
+void ds3_mtl_specular3f(float r, float g, float b);
+/* TODO shininess tables */
+
 void ds3_viewport(int x, int y, int w, int h);
 
 void ds3_matrix_mode(int mmode);
@@ -73,7 +95,7 @@ void ds3_vertex3f(float x, float y, float z);
 void ds3_vertex2(int32_t x, int32_t y);
 void ds3_vertex2f(float x, float y);
 void ds3_color(uint16_t color);
-void ds3_color3b(unsigned char r, unsigned char g, unsigned char b);
+void ds3_color3b(unsigned int r, unsigned int g, unsigned int b);
 void ds3_color3f(float r, float g, float b);
 void ds3_normal(int32_t x, int32_t y, int32_t z);
 void ds3_normal3f(float x, float y, float z);

@@ -35,6 +35,98 @@ void ds3_clear_depth(int z)
 	REG_CLEAR_DEPTH = z;
 }
 
+void ds3_light_dir(int lidx, int32_t x, int32_t y, int32_t z)
+{
+	REG_LIGHT_VECTOR = (lidx << 30) | ((x & 0x1ff80) >> 7) | ((y & 0x1ff80) << 3) |
+		((z & 0x1ff80) << 13);
+}
+
+void ds3_light_dirf(int lidx, float x, float y, float z)
+{
+	ds3_light_dir(lidx, (int32_t)(x * 65536.0f), (int32_t)(y * 65536.0f), (int32_t)(z * 65536.0f));
+}
+
+void ds3_light_color(int lidx, uint16_t color)
+{
+	REG_LIGHT_COLOR = (lidx << 30) | color;
+}
+
+void ds3_light_color3b(int lidx, unsigned int r, unsigned int g, unsigned int b)
+{
+	ds3_light_color(lidx, RGB15(r, g, b));
+}
+
+void ds3_light_color3f(int lidx, float r, float g, float b)
+{
+	ds3_light_color3b(lidx, r * 255.0f, g * 255.0f, b * 255.0f);
+}
+
+static uint32_t dif_amb, spec_emit;
+
+void ds3_ambient(uint16_t color)
+{
+	dif_amb = (dif_amb & 0x7fff) | ((uint32_t)color << 16);
+	REG_DIF_AMB = dif_amb;
+}
+
+void ds3_ambient3b(unsigned int r, unsigned int g, unsigned int b)
+{
+	ds3_ambient(RGB15(r, g, b));
+}
+
+void ds3_ambient3f(float r, float g, float b)
+{
+	ds3_ambient3b(r * 255.0f, g * 255.0f, b * 255.0f);
+}
+
+
+void ds3_mtl_diffuse(uint16_t color)
+{
+	dif_amb = (dif_amb & 0x7fff0000) | (uint32_t)color;
+	REG_DIF_AMB = dif_amb;
+}
+
+void ds3_mtl_diffuse3b(unsigned int r, unsigned int g, unsigned int b)
+{
+	ds3_mtl_diffuse(RGB15(r, g, b));
+}
+
+void ds3_mtl_diffuse3f(float r, float g, float b)
+{
+	ds3_mtl_diffuse3b(r * 255.0f, g * 255.0f, b * 255.0f);
+}
+
+void ds3_mtl_specular(uint16_t color)
+{
+	spec_emit = (spec_emit & 0x7fff0000) | (uint32_t)color;
+	REG_SPE_EMI = spec_emit;
+}
+
+void ds3_mtl_emissive(uint16_t color)
+{
+	spec_emit = (spec_emit & 0x7fff) | ((uint32_t)color << 16);
+}
+
+void ds3_mtl_specular3b(unsigned int r, unsigned int g, unsigned int b)
+{
+	ds3_mtl_specular(RGB15(r, g, b));
+}
+
+void ds3_mtl_emissive3b(unsigned int r, unsigned int g, unsigned int b)
+{
+	ds3_mtl_emissive(RGB15(r, g, b));
+}
+
+void ds3_mtl_specular3f(float r, float g, float b)
+{
+	ds3_mtl_specular3b(r * 255.0f, g * 255.0f, b * 255.0f);
+}
+
+void ds3_mtl_emissive3f(float r, float g, float b)
+{
+	ds3_mtl_emissive3b(r * 255.0f, g * 255.0f, b * 255.0f);
+}
+
 void ds3_viewport(int x, int y, int w, int h)
 {
 	int x1 = x + w - 1;
@@ -170,7 +262,7 @@ void ds3_color(uint16_t color)
 	REG_COLOR = color;
 }
 
-void ds3_color3b(unsigned char r, unsigned char g, unsigned char b)
+void ds3_color3b(unsigned int r, unsigned int g, unsigned int b)
 {
 	REG_COLOR = RGB15(r >> 3, g >> 3, b >> 3);
 }
@@ -185,7 +277,7 @@ void ds3_color3f(float r, float g, float b)
 
 void ds3_normal(int32_t x, int32_t y, int32_t z)
 {
-	REG_NORMAL = ((x >> 7) & 0x3ff) | ((y << 17) & 0xffc00) | ((z << 27) & 0x3ff00000);
+	REG_NORMAL = ((x & 0x1ff80) >> 7) | ((y & 0x1ff80) << 3) | ((z & 0x1ff80) << 13);
 }
 
 void ds3_normal3f(float x, float y, float z)
